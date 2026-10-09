@@ -1,0 +1,6 @@
+{
+  "name": "Billet-Doux · Handcrafted Digital Stationery",
+  "description": "Create, customize, and send tactile vintage letters with pressed botanical toppers, wax seals, and unfolding envelope animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

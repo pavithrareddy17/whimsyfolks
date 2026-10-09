@@ -1,0 +1,112 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --paper-cotton: #fcf9f2;
+    --paper-parchment: #f4ecdc;
+    --ink-sepia: #4a3b32;
+  }
+}
+
+/* Texture and Pattern Utilities */
+.bg-parchment-texture {
+  background-color: #f7efe1;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0%, rgba(230, 215, 190, 0.3) 100%),
+    radial-gradient(ellipse at 15% 15%, rgba(195, 160, 120, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 85% 85%, rgba(175, 140, 100, 0.14) 0%, transparent 60%);
+}
+
+.bg-cotton-paper {
+  background-color: #FAF7F0;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(237, 230, 215, 0.5) 0%, transparent 50%);
+  box-shadow: 
+    0 2px 4px rgba(0,0,0,0.02),
+    0 10px 25px -5px rgba(60, 45, 30, 0.08),
+    inset 0 0 40px rgba(220, 205, 180, 0.2);
+}
+
+.bg-lined-paper {
+  background-color: #FAF8F2;
+  background-image: 
+    linear-gradient(to right, transparent 54px, rgba(220, 130, 130, 0.25) 54px, rgba(220, 130, 130, 0.25) 56px, transparent 56px),
+    repeating-linear-gradient(transparent, transparent 27px, rgba(160, 175, 195, 0.35) 28px);
+  background-size: 100% 28px, 100% 28px;
+  line-height: 28px;
+}
+
+.bg-grid-paper {
+  background-color: #FAF8F2;
+  background-image: 
+    radial-gradient(circle, rgba(130, 120, 110, 0.25) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Deckled Edge realism */
+.deckled-edge {
+  box-shadow: 
+    0 1px 3px rgba(60, 45, 30, 0.06),
+    0 8px 24px -4px rgba(60, 45, 30, 0.12),
+    0 25px 40px -10px rgba(60, 45, 30, 0.1);
+  filter: drop-shadow(0 2px 4px rgba(45, 35, 25, 0.06));
+}
+
+/* Wax Seal 3D effect */
+.wax-seal-shadow {
+  box-shadow: 
+    0 4px 10px rgba(45, 20, 10, 0.35),
+    0 8px 20px rgba(30, 10, 5, 0.25),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+}
+
+.wax-seal-inner {
+  box-shadow: 
+    inset 0 2px 5px rgba(0, 0, 0, 0.3),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.3),
+    0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+/* Envelope 3D perspectives */
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Washi Tape styling */
+.washi-tape-strip {
+  background: rgba(243, 233, 215, 0.85);
+  backdrop-filter: blur(2px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  border-left: 2px dashed rgba(200, 180, 160, 0.5);
+  border-right: 2px dashed rgba(200, 180, 160, 0.5);
+}
+
+/* Postal stamp serrated border effect */
+.stamp-edge {
+  filter: drop-shadow(0 2px 4px rgba(60, 40, 20, 0.15));
+}
+
+/* Custom Scrollbar for vintage feel */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(235, 227, 214, 0.4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(180, 165, 145, 0.6);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(150, 135, 115, 0.8);
+}
