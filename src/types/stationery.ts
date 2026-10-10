@@ -119,6 +119,8 @@ export interface LetterData {
   waxGilded?: boolean;
   recipientName: string;
   senderName: string;
+  recipientAddress?: string;
+  senderLocation?: string;
 
   // STEP 2: Letter Paper & Whimsical Stickers
   paperStyle: PaperStyleId;

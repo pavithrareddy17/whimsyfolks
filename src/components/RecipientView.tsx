@@ -73,7 +73,7 @@ export const RecipientView: React.FC<RecipientViewProps> = ({
               onClick={() => setShowExportModal(true)}
               className="px-3 py-1.5 text-xs font-serif font-medium bg-[#EAE0D0] hover:bg-[#E0D4C2] border border-[#D5C6AF] rounded-md transition-colors text-[#3D3226] cursor-pointer"
             >
-              Save Keepsake
+              Share Letter
             </button>
           )}
 

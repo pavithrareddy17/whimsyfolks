@@ -1,0 +1,60 @@
+{
+  "32kdj7": {
+    "id": "32kdj7",
+    "letter": {
+      "title": "Test Letter",
+      "recipientName": "Eleanor"
+    },
+    "createdAt": 1791652012527
+  },
+  "9983ka": {
+    "id": "9983ka",
+    "letter": {
+      "id": "letter-default",
+      "updatedAt": 1791558096687,
+      "envelopeStyle": "kraft-rustic",
+      "envelopeFlap": "peaked",
+      "envelopeDecor": "none",
+      "waxSealMotif": "tulip",
+      "waxSealMonogramLetter": "C",
+      "waxColor": "crimson-velvet",
+      "recipientName": "ME",
+      "senderName": "Pavithra",
+      "paperStyle": "lined-notebook",
+      "stickers": [],
+      "fontChoice": "alex-brush",
+      "inkColor": "crimson",
+      "textAlign": "left",
+      "dateHeading": "Friday morning, beside the window",
+      "salutation": "Happy Birthday, Wonderful Soul!",
+      "title": "May your sweetest wishes come true",
+      "body": "Wishing you a day filled with laughter that rings like bells, warm slices of berry cake, and all the love this world has to offer!\n\nMay this upcoming year unfold like the loveliest secret garden, with unexpected joys around every corner.\n\nBlow out the candles and make the biggest wish!",
+      "signoff": "With endless birthday hugs,",
+      "postscript": "P.S. Save the biggest slice of frosted cake for me!",
+      "envelopeLiner": "botanical",
+      "stamps": [
+        "botanical"
+      ],
+      "recipientAddress": "Wisteria Cottage, Rosehip Lane\nNear the Old Bramble Mill",
+      "senderLocation": "MEADOWBROOK",
+      "postmarkDate": "09 OCT 1926",
+      "stampDesign": "botanical",
+      "envelopeColor": "sage",
+      "floralTopper": "wild-rose",
+      "floralPosition": "top-right",
+      "pinStyle": "twine-tie",
+      "waxGilded": false,
+      "waxRimShape": "organic-melted"
+    },
+    "createdAt": 1791653516234
+  },
+  "yxvdrj": {
+    "id": "yxvdrj",
+    "letter": {
+      "title": "Birthday Wishes",
+      "recipientName": "Alice",
+      "body": "Happy Birthday!"
+    },
+    "createdAt": 1791655845296
+  }
+}

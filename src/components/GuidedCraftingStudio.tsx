@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { toPng, toJpeg } from 'html-to-image';
-import jsPDF from 'jspdf';
-import { encodeLetterToHash } from '../utils/serialization';
+import { createLetterShareUrl, encodeLetterToHash, generateOneLineShareUrl } from '../utils/serialization';
+import { downloadLetterAsPng } from '../utils/exportImage';
 import {
   EnvelopeDecorId,
   EnvelopeStyleId,
@@ -60,16 +59,16 @@ export const GuidedCraftingStudio: React.FC<GuidedCraftingStudioProps> = ({
   onOpenExportModal,
 }) => {
   const [copiedLink, setCopiedLink] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportStatus, setExportStatus] = useState<string | null>(null);
   const [generatedLink, setGeneratedLink] = useState<string | null>(null);
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [isSavingImage, setIsSavingImage] = useState(false);
+  const [saveImageMessage, setSaveImageMessage] = useState<string | null>(null);
 
   const steps = [
     { num: 1 as const, title: 'Envelope & Wax', icon: '✉️' },
     { num: 2 as const, title: 'Card & Letter', icon: '📜' },
     { num: 3 as const, title: 'Preview & Unfold', icon: '🕯️' },
-    { num: 4 as const, title: 'Send & PDF', icon: '💌' },
+    { num: 4 as const, title: 'Send & Share', icon: '💌' },
   ];
 
   const handleUpdate = (updates: Partial<LetterData>, sound?: 'pen' | 'stamp' | 'wax') => {
@@ -81,15 +80,18 @@ export const GuidedCraftingStudio: React.FC<GuidedCraftingStudioProps> = ({
     onChange(updates);
   };
 
-  const handleGenerateShareLink = () => {
+  const handleGenerateShareLink = async () => {
     setIsGeneratingLink(true);
     sounds.playStampThud();
-    setTimeout(() => {
-      const hash = encodeLetterToHash(letter);
-      const url = `${window.location.origin}${window.location.pathname}#letter=${hash}`;
+    try {
+      const url = await generateOneLineShareUrl(letter);
       setGeneratedLink(url);
+    } catch {
+      const fallbackUrl = createLetterShareUrl(letter);
+      setGeneratedLink(fallbackUrl);
+    } finally {
       setIsGeneratingLink(false);
-    }, 200);
+    }
   };
 
   const handleCopyLink = async () => {
@@ -104,65 +106,21 @@ export const GuidedCraftingStudio: React.FC<GuidedCraftingStudioProps> = ({
     }
   };
 
-  const handleDownloadPDF = async (includeEnvelope: boolean) => {
-    const targetNode = includeEnvelope
-      ? document.getElementById('preview-canvas-container') || document.getElementById('printable-letter-paper')
-      : document.getElementById('printable-letter-paper') || document.getElementById('preview-canvas-container');
-
-    if (!targetNode) return;
-
+  const handleSaveImage = async () => {
     try {
-      setIsExporting(true);
-      setExportStatus('Generating PDF...');
+      setIsSavingImage(true);
       sounds.playPaperRustle();
-
-      const imgData = await toPng(targetNode, { pixelRatio: 2.2 });
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      const yOffset = pdfHeight < 297 ? (297 - pdfHeight) / 2 : 10;
-
-      pdf.addImage(imgData, 'PNG', 0, yOffset, pdfWidth, pdfHeight);
-      pdf.save(`billet-doux-${includeEnvelope ? 'envelope-keepsake' : 'letter'}.pdf`);
-
+      setSaveImageMessage('Rendering letter image...');
+      await downloadLetterAsPng(letter);
       sounds.playStampThud();
-      setExportStatus('PDF downloaded');
-      setTimeout(() => setExportStatus(null), 3000);
-    } catch {
-      setExportStatus('Failed to generate PDF');
+      setSaveImageMessage('✓ Letter image saved (PNG)!');
+      setTimeout(() => setSaveImageMessage(null), 3500);
+    } catch (err) {
+      console.error(err);
+      setSaveImageMessage('Could not save image. Please try again.');
+      setTimeout(() => setSaveImageMessage(null), 3000);
     } finally {
-      setIsExporting(false);
-    }
-  };
-
-  const handleDownloadImage = async () => {
-    const node = document.getElementById('printable-letter-paper') || document.getElementById('preview-canvas-container');
-    if (!node) return;
-
-    try {
-      setIsExporting(true);
-      setExportStatus('Generating Image...');
-      sounds.playPaperRustle();
-
-      const dataUrl = await toPng(node, { quality: 0.98, pixelRatio: 2.5 });
-      const link = document.createElement('a');
-      link.download = 'billet-doux-letter.png';
-      link.href = dataUrl;
-      link.click();
-
-      sounds.playStampThud();
-      setExportStatus('Image downloaded');
-      setTimeout(() => setExportStatus(null), 3000);
-    } catch {
-      setExportStatus('Failed to generate Image');
-    } finally {
-      setIsExporting(false);
+      setIsSavingImage(false);
     }
   };
 
@@ -848,14 +806,14 @@ export const GuidedCraftingStudio: React.FC<GuidedCraftingStudioProps> = ({
                 }}
                 className="flex-1 py-2.5 bg-[#8F3F35] hover:bg-[#7D3229] text-[#FAF5EB] rounded-md font-serif text-xs font-semibold shadow-xs transition-colors flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Continue to Send & Download</span>
+                <span>Continue to Send & Share</span>
                 <span>→</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* ================= STEP 4: SEND & PDF ================= */}
+        {/* ================= STEP 4: SEND & SHARE ================= */}
         {currentStep === 4 && (
           <div className="space-y-4 animate-fade-in">
             {/* Generate Shareable Link Action */}
@@ -877,7 +835,7 @@ export const GuidedCraftingStudio: React.FC<GuidedCraftingStudioProps> = ({
                       type="text"
                       readOnly
                       value={generatedLink}
-                      className="flex-1 text-xs px-2.5 py-1.5 bg-[#FAF8F2] border border-[#C5B39A] rounded-md font-mono text-[#5C4D3D] focus:outline-none select-all shadow-inner"
+                      className="flex-1 text-xs px-2.5 py-1.5 bg-[#FAF8F2] border border-[#C5B39A] rounded-md font-mono text-[#5C4D3D] focus:outline-none select-all shadow-inner truncate whitespace-nowrap overflow-x-auto"
                     />
                     <button
                       type="button"
@@ -897,7 +855,14 @@ export const GuidedCraftingStudio: React.FC<GuidedCraftingStudioProps> = ({
                       type="button"
                       onClick={() => {
                         sounds.playWaxCrack();
-                        window.location.hash = `letter=${encodeLetterToHash(letter)}`;
+                        if (generatedLink) {
+                          const hashIdx = generatedLink.indexOf('#');
+                          if (hashIdx >= 0) {
+                            window.location.hash = generatedLink.slice(hashIdx + 1);
+                            return;
+                          }
+                        }
+                        window.location.hash = `l=${encodeLetterToHash(letter)}`;
                       }}
                       className="flex-1 py-1.5 px-2.5 text-xs font-serif bg-[#EFE7DC] hover:bg-[#E5DACB] border border-[#DDD0BC] rounded-md text-[#3D3226] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                     >
@@ -917,44 +882,24 @@ export const GuidedCraftingStudio: React.FC<GuidedCraftingStudioProps> = ({
               )}
             </div>
 
-            {/* Direct Download Buttons */}
-            <div className="grid grid-cols-2 gap-2">
+            {/* Save as Image (PNG) Action */}
+            <div className="space-y-1.5">
               <button
                 type="button"
-                disabled={isExporting}
-                onClick={() => handleDownloadPDF(false)}
-                className="p-2.5 bg-[#FFFDF9] hover:bg-[#F5EEE0] border border-[#DDD0BC] rounded-md text-center transition-colors font-serif text-xs font-semibold text-[#2E2419] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-2xs"
-              >
-                <span>📄</span>
-                <span>Letter PDF</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={isExporting}
-                onClick={() => handleDownloadPDF(true)}
-                className="p-2.5 bg-[#FFFDF9] hover:bg-[#F5EEE0] border border-[#DDD0BC] rounded-md text-center transition-colors font-serif text-xs font-semibold text-[#2E2419] cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-2xs"
-              >
-                <span>✉️</span>
-                <span>Envelope & Letter PDF</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={isExporting}
-                onClick={handleDownloadImage}
-                className="p-2.5 bg-[#FFFDF9] hover:bg-[#F5EEE0] border border-[#DDD0BC] rounded-md text-center transition-colors font-serif text-xs font-semibold text-[#2E2419] cursor-pointer col-span-2 disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-2xs"
+                disabled={isSavingImage}
+                onClick={handleSaveImage}
+                className="w-full p-2.5 bg-[#FFFDF9] hover:bg-[#F5EEE0] border border-[#DDD0BC] rounded-md text-center transition-colors font-serif text-xs text-[#5C4533] cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 shadow-2xs font-medium"
               >
                 <span>🖼️</span>
-                <span>Save Image (PNG)</span>
+                <span>{isSavingImage ? 'Rendering PNG Image...' : 'Save as Image (PNG)'}</span>
               </button>
-            </div>
 
-            {exportStatus && (
-              <div className="p-2 bg-[#FAF0DE] border border-[#E5D2B8] rounded text-center text-xs font-serif text-[#684920] animate-fade-in">
-                {exportStatus}
-              </div>
-            )}
+              {saveImageMessage && (
+                <div className="p-2 bg-[#FAF0DE] border border-[#E5D2B8] rounded text-center text-xs font-serif text-[#684920] animate-fade-in">
+                  {saveImageMessage}
+                </div>
+              )}
+            </div>
 
             <button
               type="button"

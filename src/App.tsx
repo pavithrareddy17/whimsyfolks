@@ -9,6 +9,7 @@ import { DEFAULT_LETTER } from './utils/presets';
 import {
   decodeLetterFromHash,
   loadCurrentDraft,
+  resolveLetterFromCodeOrHash,
   saveLetterToStorage,
 } from './utils/serialization';
 import { sounds } from './utils/soundEffects';
@@ -33,45 +34,66 @@ export default function App() {
   const [showBoxModal, setShowBoxModal] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
+  const [isLoadingSharedLetter, setIsLoadingSharedLetter] = useState(false);
+
   // Initialize from URL hash, query param, or localStorage
   useEffect(() => {
-    const handleHash = () => {
-      // Check query parameter ?letter=
+    let isCancelled = false;
+
+    const handleHash = async () => {
+      let codeOrHash = '';
+
+      // Check query parameter ?l= or ?letter= or ?id=
       try {
         const params = new URLSearchParams(window.location.search);
-        const queryEncoded = params.get('letter');
-        if (queryEncoded) {
-          const decoded = decodeLetterFromHash(queryEncoded);
-          if (decoded) {
-            setLetter(decoded);
-            setIsRecipientSharedView(true);
-            return;
-          }
-        }
+        codeOrHash = params.get('l') || params.get('letter') || params.get('id') || '';
       } catch {
         // ignore
       }
 
-      // Check URL hash #letter=
-      const hash = window.location.hash;
-      if (hash.startsWith('#letter=')) {
-        const encoded = hash.slice('#letter='.length);
-        const decoded = decodeLetterFromHash(encoded);
-        if (decoded) {
-          setLetter(decoded);
-          setIsRecipientSharedView(true);
-          return;
+      // Check URL hash #l= (new short format) or #letter= (legacy format)
+      if (!codeOrHash) {
+        const hash = window.location.hash;
+        if (hash.startsWith('#l=')) {
+          codeOrHash = hash.slice('#l='.length);
+        } else if (hash.startsWith('#letter=')) {
+          codeOrHash = hash.slice('#letter='.length);
+        } else if (hash.startsWith('#/l/')) {
+          codeOrHash = hash.slice('#/l/'.length);
+        }
+      }
+
+      if (codeOrHash) {
+        setIsLoadingSharedLetter(true);
+        try {
+          const resolved = await resolveLetterFromCodeOrHash(codeOrHash);
+          if (!isCancelled && resolved) {
+            setLetter(resolved);
+            setIsRecipientSharedView(true);
+            return;
+          }
+        } catch (err) {
+          console.warn('Failed resolving letter from hash:', err);
+        } finally {
+          if (!isCancelled) {
+            setIsLoadingSharedLetter(false);
+          }
         }
       }
 
       // If no shared hash, load last saved draft
       const draft = loadCurrentDraft();
-      setLetter(draft);
+      if (!isCancelled) {
+        setLetter(draft);
+      }
     };
 
     handleHash();
     window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    return () => {
+      isCancelled = true;
+      window.removeEventListener('hashchange', handleHash);
+    };
   }, []);
 
   // Update letter helper and auto-save
@@ -244,7 +266,7 @@ export default function App() {
             className="px-3.5 py-1.5 text-xs font-serif font-medium bg-[#8F3F35] hover:bg-[#7D3229] text-[#FAF5EB] rounded-md shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <span>💌</span>
-            <span>Send & PDF</span>
+            <span>Share Letter</span>
           </button>
         </div>
       </header>
