@@ -52,11 +52,11 @@ function saveStoredLetters(data: Record<string, LetterRecord>) {
 
 letterStore = loadStoredLetters();
 
-// Generates concise, unambiguous 6-character short code for clean one-line links
+// Generates concise, unambiguous 5-character short code for ultra-short one-line links
 function generateShortId(): string {
   const chars = '23456789abcdefghjkmnpqrstuvwxyz';
   let result = '';
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 5; i++) {
     result += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return result;

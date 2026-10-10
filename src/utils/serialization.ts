@@ -249,16 +249,16 @@ export function encodeLetterToHash(letter: LetterData): string {
  */
 export function createLetterShareUrl(letter: LetterData): string {
   const code = encodeLetterToShortHash(letter);
-  const origin = window.location.origin + window.location.pathname;
-  return `${origin}#l=${code}`;
+  const base = `${window.location.origin}${window.location.pathname}`.replace(/\/+$/, '');
+  return `${base}#l=${code}`;
 }
 
 /**
- * Generates an ultra-short one-line URL via the backend service (e.g. https://...#l=abc123),
+ * Generates an ultra-short one-line URL via the backend service (e.g. https://domain/#l=32kdj or https://domain/l/32kdj),
  * with instant local caching and graceful fallback.
  */
 export async function generateOneLineShareUrl(letter: LetterData): Promise<string> {
-  const origin = window.location.origin + window.location.pathname;
+  const origin = window.location.origin;
 
   try {
     const res = await fetch('/api/letters', {
@@ -273,7 +273,8 @@ export async function generateOneLineShareUrl(letter: LetterData): Promise<strin
       const data = await res.json();
       if (data && data.id) {
         cacheShortLetter(data.id, letter);
-        return `${origin}#l=${data.id}`;
+        // Clean, shortest one-line URL format
+        return `${origin}/#l=${data.id}`;
       }
     }
   } catch (err) {
@@ -282,7 +283,8 @@ export async function generateOneLineShareUrl(letter: LetterData): Promise<strin
 
   // Graceful client-side fallback
   const code = encodeLetterToShortHash(letter);
-  return `${origin}#l=${code}`;
+  const base = `${origin}${window.location.pathname}`.replace(/\/+$/, '');
+  return `${base}#l=${code}`;
 }
 
 /**
